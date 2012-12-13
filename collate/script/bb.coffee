@@ -137,36 +137,3 @@ class GridItemView extends CompositeView
       @$el.find('img')
         .addClass(orientation)
         .css(@offsetDirections[orientation], "-#{@model.get('offset')}px")
-
-
-
-##############################################################################
-
-###
-items = new ItemCollection([
-  {
-    thumbnail_url: 'http://25.media.tumblr.com/tumblr_md35uqiWEw1r4ohk5o1_500.jpg'
-  }, {
-    thumbnail_url: 'http://25.media.tumblr.com/tumblr_md35uqiWEw1r4ohk5o1_500.jpg'
-    orientation: 'landscape'  # landscape
-    offset: 20
-  }, {
-    thumbnail_url: 'http://i.imgur.com/sPU9A.png'
-  }, {
-    thumbnail_url: 'http://i.imgur.com/sPU9A.png'
-    orientation: 'portrait'  # portrait
-    offset: 2
-  }
-], board_id: 1)
-@app = new GridView().render(items)
-@app.$el.appendTo('.content')
-
-item = items.models[0]
-@f = ->
-  item.set
-    orientation: 'landscape'
-    offset: 30
-
-@app.items = items
-@app.bindTo(items, 'add', @app.append)
-###

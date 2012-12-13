@@ -23,7 +23,7 @@ def create_app():
     #app.session_interface = ItsdangerousSessionInterface()
 
     # XXX are we using redis?
-    app.redis = StrictRedis(db=app.config['REDIS_DB'])
+    #app.redis = StrictRedis(db=app.config['REDIS_DB'])
     db.init_app(app)
 
     login_manager.setup_app(app)
