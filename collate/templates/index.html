@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+
+  {#
+  <div id=susytest>
+    <div id=one>one</div>
+    <div id=two>two</div>
+    <div id=three>three</div>
+  </div>
+
+  <p>All users:</p>
+  <ul>
+  {% for user in users %}
+    <li>{{ user.email }}</li>
+  {% endfor %}
+  </ul>
+
+  {% if current_user.is_authenticated() %}
+  <p>Logged in as {{ current_user.email }}
+    (<a href="{{ url_for('auth.logout') }}">log out</a>).</p>
+  {% else %}
+    <p><a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+  {% endif %}
+
+  {% if current_user.is_authenticated() %}
+  <p>Connected users:</p>
+  <ul id="connected"></ul>
+
+  <table id="chat"></table>
+  <form id="form"><input id="input"></form>
+  {% endif %}
+
+  <div id=dropzone></div>
+  #}
+
+{% endblock %}
+
+
+{% block extra_head %}
+  <script>
+    URLS = {};
+    URLS.upload = {{ url_for('main.upload')|tojson|safe }};
+  </script>
+{% endblock %}
+
+
+{% block scripts %}
+
+  <script>
+    items = new ItemCollection({{ items|tojson|safe }}, {board_id: {{ board.id }}})
+    app = new GridView().render(items)
+    app.items = items
+    app.$el.appendTo('.content')
+    app.bindTo(items, 'add', app.append)
+
+
+    {#
+    var board = {{ board.serialize()|tojson|safe }};
+    {# var items = {{ items|tojson|safe }}; #}
+
+    function readCookie(name) {
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+      }
+      return null;
+    }
+  </script>
+
+
+  {% if current_user.is_authenticated() %}
+  <script src="{{ config.SOCKET_URL }}socket.io/socket.io.v0.9.10.js"></script>
+  <script>
+    var socket_url = {{ config.SOCKET_URL|tojson|safe }};
+    var session = {{ session.serialize()|tojson|safe }};
+    // var socket = io.connect(socket_url + '?session=' + encodeURIComponent(session));
+    var socket = io.connect(socket_url);
+
+    var output = document.getElementById('chat');
+    var input = document.getElementById('input');
+    var form = document.getElementById('form');
+    var connected = document.getElementById('connected');
+
+
+    socket.on('say', function (name, msg) {
+      var row = document.createElement('tr');
+      console.log('say', name, msg);
+      row.appendChild(document.createElement('th')).appendChild(
+        document.createTextNode(name));
+      row.appendChild(document.createElement('td')).appendChild(
+        document.createTextNode(msg));
+      output.appendChild(row);
+    });
+    /*
+    form.onsubmit = function (event) {
+      event.preventDefault();
+      socket.emit('say', input.value);
+      input.value = '';
+    };
+    */
+
+    socket.on('add-item', function (item) {
+      app.items.add(item)
+    });
+
+    function updateUserList(users) {
+      c = $(connected).empty();
+      $.each(users, function (i, user) {
+        c.append($('<li/>').text(user));
+      });
+    }
+
+
+    socket.on('error', function (msg) {
+      alert('Unable to connect: ' + msg)
+    });
+    socket.on('connect', function () {
+      console.log('connected!')
+      // XXX should be board.id, or maybe even just canonical URL part
+      socket.emit('join', 'board/{{ board.name }}', session, function (users) {
+        updateUserList(users);
+      });
+    });
+    socket.on('disconnect', function () {
+      console.log('disconnected!');
+    });
+    socket.on('reconnect_failed', function () {
+      // XXX https://github.com/LearnBoost/socket.io/issues/652
+      console.log('failed to reconnect!');
+    });
+
+    socket.on('leave', function () {
+      socket.emit('getUserList', function (data) {
+        updateUserList(data);
+      });
+    });
+  </script>
+  {% endif %}
+{% endblock %}

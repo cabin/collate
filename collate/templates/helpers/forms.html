@@ -1,0 +1,41 @@
+{# XXX customize this;
+
+field.flags.required
+swap order on BooleanField
+style errors
+figure out tags/styling
+
+#}
+
+{% macro render_field(field) %}
+  <p>
+  {% if field.type in ['BooleanField'] %}
+    {{ field(**kwargs) }}
+    {{ field.label }}
+  {% else %}
+    {{ field.label }}
+    {{ field(**kwargs) }}
+  {% endif %}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </p>
+{% endmacro %}
+
+
+{% macro render_form(form, autofocus=none) %}
+  {{ form.hidden_tag() }}
+  {% for field in form %}
+    {% if field.type not in ['CSRFTokenField', 'HiddenField'] %}
+      {% if field.name == autofocus %}
+        {{ render_field(field, autofocus=true) }}
+      {% else %}
+        {{ render_field(field) }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}

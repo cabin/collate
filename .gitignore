@@ -1,0 +1,11 @@
+*.py[cod]
+.DS_Store
+
+data.db
+dump.rdb
+local_settings.cfg
+instance
+
+*/static/gen/*
+.sass-cache
+.webassets-cache
