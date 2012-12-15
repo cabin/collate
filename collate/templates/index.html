@@ -53,7 +53,7 @@
     app = new GridView().render(items)
     app.items = items
     app.$el.appendTo('.content')
-    app.bindTo(items, 'add', app.append)
+    app.listenTo(items, 'add', app.append)
 
 
     {#

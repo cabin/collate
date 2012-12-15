@@ -35,7 +35,7 @@ class @ItemCollection extends Backbone.Collection
     @url = "/board/#{options.board_id}/items"
 
 
-class @GridView extends CompositeView
+class @GridView extends HierView
   tagName: 'div'
   className: 'grid'
 
@@ -106,7 +106,7 @@ class @GridView extends CompositeView
     @dragLeave()
 
 
-class GridItemView extends CompositeView
+class GridItemView extends HierView
   tagName: 'figure'
   template: Handlebars.templates['grid-item']
   offsetDirections:
@@ -115,7 +115,7 @@ class GridItemView extends CompositeView
 
   initialize: ->
     #@bindTo(@model, 'change:thumbnail_url', @render)
-    @bindTo(@model, 'change', @render)
+    @listenTo(@model, 'change', @render)
     # XXX update? no point in changing thumbnail_url once it's set once... want
     # to transition .new -> no-class rather than re-render for transition, etc.
     # actually, maybe want to preload the new thumbnail_url to prime caches for

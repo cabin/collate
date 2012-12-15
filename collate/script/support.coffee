@@ -5,56 +5,26 @@
 #### ElementRouter
 # A `Backbone.Router` used to show a single view at a time. Instances must have
 # an `el` attribute, whose contents will be replaced with the rendered view
-# each time `show(view)` is called. Any previous view's `tearDown` method will
-# be called first, if one exists.
+# each time `show(view)` is called. Any previous view will be removed.
 class @ElementRouter extends Backbone.Router
-  # If your views use a different naming scheme for their tear down methods,
-  # supply that name here.
-  tearDownMethod: 'tearDown'
 
   show: (view) ->
-    @currentView?[@tearDownMethod]?()
+    @currentView?.remove()
     @currentView = view
     $(@el).empty().append(view.render().el)
 
 
 #### CompositeView
-# A `Backbone.View` that is aware of its subviews and handles releasing memory
-# via `tearDown` methods.
-class @CompositeView extends Backbone.View
+# A `Backbone.View` that is aware of its subviews and removes them when it is
+# removed. Use Backbone >=0.9.9's `listenTo` method to track bound events,
+# which will also be removed along with the view.
+class @HierView extends Backbone.View
 
-  constructor: (options) ->
-    @bindings = []
-    @children = []
-    super(options)
-
-  # This method should be called when finished with the view (instead of simply
-  # removing `view.el`). It removes all bindings created with `bindTo`, calls
-  # `tearDown` on each of its children, and removes itself from its parent view
-  # (if any).
-  tearDown: ->
-    @trigger('leave')
-    @unbind()
-    _(@bindings).each (binding) ->
-      binding.source.unbind(binding.event, binding.callback)
-    @remove()
-    _(@children).each (child) -> child.tearDown?()
-    @parent?.removeChild?(this)
-
-  # Remove the given `view` from the list of children.
-  removeChild: (view) ->
-    @children = _(@children).without(view)
-
-  # Use `this.bindTo(source, ...)` instead of `source.bind(...)` to ensure
-  # bindings are tracked and appropriately removed along with the view.
-  bindTo: (source, event, callback) ->
-    @bindings.push(source: source, event: event, callback: callback)
-    source.bind(event, callback, this)
-
-  # Add a new child view.
+  # Add a new tracked child view.
   addChild: (view) ->
-    @children.push(view)
-    view.parent = this
+    @_children or= []
+    @_children.push(view)
+    view._parent = this
     view
 
   # Add a new child view and render it immediately. Return the child view's
@@ -63,3 +33,16 @@ class @CompositeView extends Backbone.View
   renderChild: (view) ->
     @addChild(view)
     view.render().el
+
+  # Remove all children, tell our parent (if any) to stop tracking us, then
+  # delegate to `Backbone.View.remove`. If `options.ignoreParent` is true, skip
+  # the parent step---useful for avoiding unnecessary bookkeeping when the
+  # parent is also being removed.
+  remove: (options) ->
+    _(@_children).invoke('remove', ignoreParent: true)
+    @_parent?._emancipate?(this) unless options.ignoreParent
+    super()
+
+  # Stop tracking the given child.
+  _emancipate: (child) ->
+    @_children = _(@_children).without(child)

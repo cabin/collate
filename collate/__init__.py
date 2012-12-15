@@ -69,7 +69,7 @@ def register_assets(app):
         'vendor/jquery-1.8.2.js',
         #'vendor/jquery.filedrop.js',
         'vendor/underscore-1.4.3.js',
-        'vendor/backbone-0.9.2.js',
+        'vendor/backbone-0.9.9.js',
         'vendor/handlebars.runtime-1.0.rc.1.js',
         filters='uglifyjs', output='gen/vendor.js')
 
