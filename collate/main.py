@@ -52,10 +52,12 @@ class BoardItems(MethodView):
         data['board_id'] = board.id
         item = Item(**data)
         if 'image' in request.files:
-            item.full_filename = photos.save(request.files['image'])
-            item.create_thumbnail(request.files['image'])
+            item.build_images(request.files['image'])
+        if item.source_url:
+            item.fetch_source_url()
         db.session.add(item)
         db.session.commit()
+        import time; time.sleep(2)  # XXX
         return jsonify(item.serialize())
 
     def put(self, board_id, item_id):

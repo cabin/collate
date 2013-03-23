@@ -1,0 +1,77 @@
+// Grid (Susy)  //////////////////////////////////////////////////////////////
+@import ../static/vendor/susy
+
+//$total-columns: 12
+//$column-width: 4em
+//$gutter-width: 20px
+//$grid-padding: $gutter-width
+
+//$total-columns: 4
+
+
+//$column-width: 4em
+//$gutter-width: 1em
+
+// Start with a 300px grid (leaving 20px for edge padding).
+$total-columns: 4
+$column-width: 66px
+$gutter-width: 12px
+$grid-padding: 0
+$grid-padding: $gutter-width
+
+//$total-columns: 7
+  $column-width: 4em
+  $gutter-width: 1em
+  $grid-padding: $gutter-width
+
+// Use this many columns as soon as they can fit.
+$break: 12
+
+// Needed to ensure proper static width. TODO: Do I really want a
+// percentage-based grid on something that's going to include a lot of
+// statically-sized images?
++border-box-sizing
+
+.content
+  +container($total-columns, $break)
+
+#one
+  +span-columns(4 omega)
+#two
+  +span-columns(3)
+#three
+  +span-columns(1 omega)
+
++at-breakpoint($break)
+  #one
+    +span-columns(4)
+  #two
+    +span-columns(7)
+  #three
+    +span-columns(1 omega)
+
+
+//
+  .content
+    +container
+
+
+//
+  +at-breakpoint(0px $total-columns (columns-width($break) - 1))
+    #one
+      +span-columns(4 omega)
+    #two
+      +span-columns(3)
+    #three
+      +span-columns(1 omega)
+
+//
+  +at-breakpoint($break)
+    .content
+      +set-container-width
+    #one
+      +span-columns(4)
+    #two
+      +span-columns(7)
+    #three
+      +span-columns(1 omega)

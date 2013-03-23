@@ -49,11 +49,17 @@
 {% block scripts %}
 
   <script>
-    items = new ItemCollection({{ items|tojson|safe }}, {board_id: {{ board.id }}})
+    board = new Board({{ board.serialize()|tojson|safe }});
+    items = new ItemCollection({{ items|tojson|safe }}, {board: board});
+    app = new BoardRouter(board, items);
+    Backbone.history.start();
+
+    /*
     app = new GridView().render(items)
     app.items = items
     app.$el.appendTo('.content')
     app.listenTo(items, 'add', app.append)
+    */
 
 
     {#
@@ -76,6 +82,11 @@
   {% if current_user.is_authenticated() %}
   <script src="{{ config.SOCKET_URL }}socket.io/socket.io.v0.9.10.js"></script>
   <script>
+  (function () {
+    if (!window.io) {
+      console.warn('unable to load socket.io');
+      return;
+    }
     var socket_url = {{ config.SOCKET_URL|tojson|safe }};
     var session = {{ session.serialize()|tojson|safe }};
     // var socket = io.connect(socket_url + '?session=' + encodeURIComponent(session));
@@ -117,7 +128,8 @@
 
 
     socket.on('error', function (msg) {
-      alert('Unable to connect: ' + msg)
+      console.error('unable to connect to socket.io: ' + msg)
+      // alert('Unable to connect: ' + msg)
     });
     socket.on('connect', function () {
       console.log('connected!')
@@ -139,6 +151,7 @@
         updateUserList(data);
       });
     });
+  })();
   </script>
   {% endif %}
 {% endblock %}

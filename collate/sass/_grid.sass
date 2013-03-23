@@ -1,0 +1,47 @@
+$gutter: 20px
+$thumbnail-size: 230px
+$figure-w: 230px
+
+
+.grid
+  +clearfix
+  min-height: $thumbnail-size
+  outline: 1px dashed rgba(0, 0, 0, .07)
+  //padding: $gutter 0 0 $gutter
+  width: $figure-w * 4 + $gutter * 3
+  &.drag
+    background-color: rgba(128, 255, 128, .1)
+
+  figure
+    background-color: #fff
+    float: left
+    width: $thumbnail-size
+    height: $thumbnail-size
+    margin: 0 $gutter $gutter 0
+    overflow: hidden
+    position: relative
+    // border: 5px solid #fff
+    // @include box-sizing(content-box)
+    // @include box-shadow(0 0 0 1px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,0.2))
+    // Vertical centering for images we haven't cropped yet.
+    &:nth-child(4n)
+      margin-right: 0
+    &.new
+      img
+        +opacity(.5)
+        margin: auto
+        top: 0
+        right: 0
+        bottom: 0
+        left: 0
+
+    img
+      max-width: 100%
+      max-height: 100%
+      position: absolute
+      @include transition(opacity 250ms)
+      &.landscape
+        max-width: none
+      &.portrait
+        max-height: none
+    // TODO: ensure perfectly square images are handled

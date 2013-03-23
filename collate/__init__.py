@@ -26,7 +26,7 @@ def create_app():
     #app.redis = StrictRedis(db=app.config['REDIS_DB'])
     db.init_app(app)
 
-    login_manager.setup_app(app)
+    login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
 
     if app.config['USE_S3']:
@@ -49,19 +49,24 @@ def create_app():
 
 def register_assets(app):
     assets = Environment(app)
-    #assets.config['stylus_plugins'] = ['nib']
-    #assets.config['stylus_extra_args'] = ['--inline', '--include', 'static']
+    assets.config['stylus_plugins'] = ['nib']
+    assets.config['stylus_extra_args'] = [
+        '--inline',
+        '--include', '%s/style' % app.root_path,
+        '--include', '%s/static' % app.root_path,
+    ]
 
     assets.register(
         'css',
         'vendor/normalize.css',
-        #Bundle(
-        #    'main.styl',
-        #    filters='stylus', output='gen/stylus.css'),
         Bundle(
-            '../sass/screen.sass',
-            depends='../sass/_*.sass',
-            filters='compass', output='gen/sass.css'),
+            '../style/screen.styl',
+            depends='../style/*.styl',
+            filters='stylus', output='gen/stylus.css'),
+        #Bundle(
+        #    '../sass/screen.sass',
+        #    depends='../sass/_*.sass',
+        #    filters='compass', output='gen/sass.css'),
         filters='cssmin', output='gen/screen.css')
 
     assets.register(

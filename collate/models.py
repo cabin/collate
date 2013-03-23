@@ -1,7 +1,10 @@
 import os.path
+from urlparse import urlparse
 
+from flask import current_app
 from flask.ext import login
 from PIL import Image
+import requests
 from sqlalchemy import event
 from StringIO import StringIO
 from werkzeug import FileStorage
@@ -56,45 +59,67 @@ class Item(db.Model):
     source_url = db.Column(db.Text)
     caption = db.Column(db.String(256))
     full_filename = db.Column(db.String(128))
-    thumbnail_filename = db.Column(db.String(128))
-    orientation = db.Column(ItemOrientationType.db_type())
-    crop_offset = db.Column(db.Integer(unsigned=True))
+    square_filename = db.Column(db.String(128))
+    midsize_filename = db.Column(db.String(128))
+    midsize_height = db.Column(db.Integer)
+    #orientation = db.Column(ItemOrientationType.db_type())
+    #crop_offset = db.Column(db.Integer(unsigned=True))
 
     def __repr__(self):
         return 'Item(board_id=%r, caption=%r)' % (self.board_id, self.caption)
 
     def serialize(self):
-        # XXX HACK
-        absolute_url = photos.url(self.thumbnail_filename)
-        relative_url = absolute_url.replace('http://collate.dev', '')
         return {
             'id': self.id,
             'board': self.board.serialize(),
             'source_url': self.source_url,
             'caption': self.caption,
             'full_url': photos.url(self.full_filename),
-            #'thumbnail_url': photos.url(self.thumbnail_filename),
-            'thumbnail_url': relative_url,
-            'orientation': self.orientation.name if self.orientation else None,
-            'crop_offset': self.crop_offset,
+            'square_url': photos.url(self.square_filename),
+            'midsize_url': photos.url(self.midsize_filename),
+            'midsize_height': photos.url(self.midsize_height),
+            #'orientation': self.orientation.name if self.orientation else None,
+            #'crop_offset': self.crop_offset,
         }
 
-    def create_thumbnail(self, storage):
-        """Set thumbnail_filename, orientation, and crop_offset."""
-        storage.seek(0)  # likely already consumed elsewhere
+    # XXX anywhere photos.save happens, make sure we are coercing the filename
+    # to something interesting/useful. <base36 itemid>-filename?
+    def build_images(self, storage):
+        """Create and save all necessary image sizes."""
+        # Full size.
+        self.full_filename = photos.save(storage)
+        base_filename, _ = os.path.splitext(storage.filename)
+
+        # Square crop.
+        storage.seek(0)
         im = Image.open(storage.stream)
-        im = image.constrain_shortest_dimension(im, 100)
-        sqof = image.square_offset(im)
-        self.orientation = getattr(ItemOrientationType, sqof['orientation'])
-        self.crop_offset = sqof['offset']
-        # Build a new FileStorage for Flask-Uploads to save.
-        outf = StringIO()
-        im.save(outf, 'JPEG')
-        outf.seek(0)
-        filename, _ = os.path.splitext(storage.filename)
-        filename += '-t.jpg'
-        out = FileStorage(outf, filename, content_type='image/jpeg')
-        self.thumbnail_filename = photos.save(out)
+        im = image.square(im, current_app.config['THUMBNAIL_SIZE'])
+        square = image.to_storage(im, base_filename + '-s.jpg')
+        self.square_filename = photos.save(square)
+
+        # Midsize crop maintaining aspect ratio.
+        storage.seek(0)
+        im = Image.open(storage.stream)
+        im = image.constrain_width(im, current_app.config['THUMBNAIL_SIZE'])
+        midsize = image.to_storage(im, base_filename + '-m.jpg')
+        self.midsize_filename = photos.save(midsize)
+        self.midsize_height = im.size[1]
+
+    def fetch_source_url(self):
+        r = requests.get(self.source_url)
+        from pprint import pprint as p
+        p(r.status_code)
+        p(r.headers)
+        p(dir(r))
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()  # XXX raises requests.exceptions.HTTPError
+        content_type = r.headers['Content-Type']
+        if content_type.startswith('image/'):
+            # XXX base36?
+            filename = os.path.basename(urlparse(self.source_url).path)
+            content = StringIO(r.content)
+            storage = FileStorage(content, filename, content_type=content_type)
+            self.build_images(storage)
 
 
 def cleanup_item(mapper, connection, item):

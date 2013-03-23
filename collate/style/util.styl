@@ -1,0 +1,9 @@
+// Set width and height at once.
+size(w, h = w)
+  width: unit(w, px)
+  height: unit(h, px)
+
+// Include an @2x image with background-size set automatically.
+image-sized(img)
+  size = image-size(img)
+  image: img size[0] size[1]

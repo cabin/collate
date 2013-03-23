@@ -1,0 +1,63 @@
+@import nib
+
+@import default
+@import util
+
+
+
+// Sidebar  //////////////////////////////////////////////////////////////////
+
+.sidebar
+  outline 1px solid red
+  float: left
+  > *
+    display: none
+  .toggle
+    background-color: black
+    display: block
+    position: absolute
+    size: 50 30
+
+.sidebar.out
+  background: green
+  > *
+    display: block
+
+.sidebar.out
+
+.grid
+  outline 1px solid red
+
+
+// Grid layout  //////////////////////////////////////////////////////////////
+
+gutter = 20px
+square_size = 230px
+
+body.drag
+  background-color: rgba(128, 128, 128, .2)
+  opacity: .7
+
+.grid
+  clearfix()
+  margin: 0 auto
+  padding: gutter 0 0 gutter
+
+  figure
+    float: left
+    margin: 0 gutter gutter 0
+    size: square_size
+    &.loading
+      position: relative
+      img
+        opacity: .5
+        // Uncropped images should just be centered.
+        absolute: top left
+        bottom: 0
+        right: 0
+        margin: auto
+
+    img
+      max-width: 100%
+      max-height: 100%
+      transition: opacity 250ms

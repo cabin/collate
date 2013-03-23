@@ -1,0 +1,90 @@
+content/item
+moodboard
+folder
+user/organization
+
+collaborators
+    board/organization/folder?
+    user
+    admin flag
+
+moodboard
+    owner/organization
+    folder -> folder (or null)
+    sort_by (custom, date, name, votes, etc.)
+    display_as (grid, masonry, list; maybe not worth persisting?)
+    colors -> ?
+
+folder
+    name
+    owner/organization
+    order?
+
+comments
+    by -> user
+    on -> content/item
+    date
+    content
+
+votes
+    by -> user
+    on -> content/item
+    date
+    up/like
+
+
+-----
+
+moodboard
+    owner/organization -> user/org
+    folder -> folder  (tags instead?)
+
+
+folder
+    owner/organization -> user/org
+    parent -> folder (or null for top-level)
+
+
+moodboard
+    owner
+
+
+-----
+
+moodboard:<id> -> hash
+    ...
+
+moodboard:<id>:items -> list of item ids
+
+item:<id> -> hash
+    original_url
+    url
+    caption
+    sizes?
+
+user:<id> -> hash
+
+
+
+HIERARCHY:
+    organization
+    user
+    project
+    folder
+    boards (of various types)
+
+    user:<id>:hierarchy -> list of keys
+        project:<id>
+
+    http://www.mongodb.org/display/DOCS/Trees+in+MongoDB
+
+    Perhaps:
+
+    <top-level>:<id>:tree -> JSON blob?
+        nested list showing the whole tree
+    <child-level>:<id>:root -> key of top level tree
+
+    Or:
+
+    <child>:<id>:ancestors -> list of ancestor keys, one per level
+    <parent>:<id>:children -> list of direct children
