@@ -14,6 +14,9 @@ def create_app():
     app.config.from_pyfile('settings.cfg')
     configure_logging(app)
     register_assets(app)
+    app.context_processor(lambda: {
+        'debug': app.debug,
+    })
     return app
 
 
