@@ -39,6 +39,7 @@ def configure_logging(app):
 
 def register_assets(app):
     assets = Environment(app)
+    assets.auto_build = app.debug
     assets.manifest = 'file'
     assets.register(
         'screen.css',
