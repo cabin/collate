@@ -13,7 +13,9 @@ def create_app():
     )
     app.config.from_pyfile('settings.cfg')
     configure_logging(app)
-    register_assets(app)
+    assets = register_assets(app)
+    if app.debug:
+        register_specs(app, assets)
     app.context_processor(lambda: {
         'debug': app.debug,
     })
@@ -56,3 +58,16 @@ def register_assets(app):
         'modernizr.js',
         'vendor/modernizr.js',
         output='gen/modernizr-%(version)s.js')
+    return assets
+
+
+def register_specs(app, assets):
+    from flask.ext.jasmine import Asset, Jasmine
+    # TODO: once Flask-Assets >0.8 is out, use assets.append_path instead of
+    # this hack. See https://github.com/miracle2k/flask-assets/issues/35.
+    assets.register(
+        'specs', '../../specs/*.coffee', '../../specs/**/*.coffee',
+        filters='coffeescript', output='gen/specs.js')
+    jasmine = Jasmine(app)
+    jasmine.specs(Asset('specs'))
+    jasmine.sources(Asset('vendor.js'))
