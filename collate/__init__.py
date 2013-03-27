@@ -2,6 +2,9 @@ import logging
 
 from flask import Flask
 from flask.ext.assets import Bundle, Environment
+from flask.ext.sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 
 def create_app():
@@ -13,6 +16,7 @@ def create_app():
     )
     app.config.from_pyfile('settings.cfg')
     configure_logging(app)
+    db.init_app(app)
     assets = register_assets(app)
     if app.debug:
         register_specs(app, assets)
