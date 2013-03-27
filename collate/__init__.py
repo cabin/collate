@@ -19,6 +19,10 @@ def create_app():
     app.context_processor(lambda: {
         'debug': app.debug,
     })
+
+    from collate.main import main
+    app.register_blueprint(main)
+
     return app
 
 
