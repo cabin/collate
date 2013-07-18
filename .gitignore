@@ -1,0 +1,5 @@
+.go
+app/bower_components
+app/build
+collate
+node_modules
