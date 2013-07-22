@@ -1,4 +1,5 @@
 .go
+.sass-cache
 app/bower_components
 app/build
 collate

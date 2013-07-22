@@ -59,7 +59,7 @@ module.exports = (grunt) ->
     done = @async()
     buildAndRun = ->
       spawn('go', ['build'], cwd: __dirname).on 'exit', ->
-        backendChild = spawn('./collate', [], cwd: __dirname)
+        backendChild = spawn('./collate', ['-dev'], cwd: __dirname)
         setTimeout(done, 100)
     if backendChild
       backendChild.on('exit', buildAndRun)

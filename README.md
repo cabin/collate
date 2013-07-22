@@ -10,9 +10,9 @@ It must be `source`d when you begin work on this project.
 
 To get started:
 
-    % go get          # install go dependencies
-    % npm install     # install grunt and its dependencies
-    % grunt bowerful  # install vendor web components
+    % go get github.com/cabin/collate  # install go dependencies
+    % npm install                      # install grunt and its dependencies
+    % grunt bowerful                   # install vendor web components
 
 `grunt dev` will start a development server that automatically rebuilds
 any changed files, including a LiveReload server.
