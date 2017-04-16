@@ -1,0 +1,76 @@
+<!doctype html>
+
+<script src="golem.js"></script>
+<script>
+  var conn;
+
+  var Reconnector = (function () {
+    var reconnection = {
+      attempts: 0,
+      attemptsMax: 20,  // Infinity,
+      delay: 500,
+      delayMax: 10000,
+    }
+
+    function Reconnector(url, setup) {
+      // extend(reconnection, options);
+
+      this.url = url;
+      this.setup = setup;
+
+      // this.conn = conn;
+      // this.oldOnClose = conn.ws.onclose;
+      // conn.ws.onclose = close.bind(this);
+    }
+
+    close = function () {
+      var delay = ++reconnection.attempts * reconnection.delay;
+      delay = Math.min(delay, reconnection.delayMax)
+      console.log('closed; waiting', delay);
+      var connTimeout = setTimeout(this.reconnect.bind(this), delay);
+      this.oldOnClose();
+    }
+
+    Reconnector.prototype.reconnect = function () {
+      ws = new WebSocket(conn.ws.url);
+      ws.onclose = this.conn.ws.onclose;
+      ws.onopen = this.conn.ws.onopen;
+      ws.onmessage = this.conn.ws.onmessage;
+      this.conn.ws = ws;
+    };
+
+    return Reconnector;
+  })();
+
+  conn = new golem.Connection('ws://localhost:4321/ws');
+  // new Reconnector(conn, setup);
+
+  /*
+  new GolemReconnector('ws://localhost:4321/ws', setup)
+  function setup(conn) {
+  }
+  */
+
+
+  /*
+  function setup() {
+    if (conn && conn.ws.readyState === conn.ws.OPEN) return;
+    console.log('trying to connect...')
+    conn = new golem.Connection('ws://localhost:4321/ws')
+
+    connTimeout = setTimeout(setup, 1000);
+    conn.on('open', function () {
+      clearTimeout(connTimeout);
+      console.log('success!');
+
+      conn.on('close', setup);
+    });
+
+    conn.on('answer', function (data) {
+      console.log('got an answer', data.msg, data.username);
+    });
+  }
+
+  setup();
+  */
+</script>

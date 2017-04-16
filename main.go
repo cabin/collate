@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	address     = flag.String("address", ":4321", "network address")
+	address     = flag.String("address", "localhost:5001", "network address")
 	devServer   = flag.Bool("dev", false, "serve static assets")
 	config      = flag.String("config", "settings.gcfg", "configuration file")
 	templateDir = flag.String("templates", "templates", "template directory")
